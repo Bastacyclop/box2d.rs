@@ -1,5 +1,3 @@
-#include "c_b2Shape.cpp"
-
 extern "C" {
 
 /// @see b2Shape::GetChildCount
@@ -42,10 +40,12 @@ const b2Vec2* box2d_PolygonShape_GetVertex(const b2PolygonShape* self, int32 ind
     return &self->GetVertex(index);
 }
 
+/*
 /// Validate convexity. This is a very time consuming operation.
 /// @returns true if valid
 bool box2d_PolygonShape_Validate(const b2PolygonShape* self) {
     return self->Validate();
 }
+*/
 
 } // extern C

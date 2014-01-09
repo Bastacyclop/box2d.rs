@@ -229,14 +229,14 @@ void box2d_World_SetAutoClearForces(b2World* self, bool flag) {
 bool box2d_World_GetAutoClearForces(const b2World* self) {
     return self->GetAutoClearForces();
 }
-
+/*
 /// Shift the world origin. Useful for large worlds.
 /// The body shift formula is: position -= newOrigin
 /// @param newOrigin the new origin with respect to the old origin
 void box2d_World_ShiftOrigin(b2World* self, const b2Vec2* newOrigin) {
     self->ShiftOrigin(*newOrigin);
 }
-
+*/
 /// Get the contact manager for testing.
 const b2ContactManager* box2d_World_GetContactManager(const b2World* self) {
     return &self->GetContactManager();

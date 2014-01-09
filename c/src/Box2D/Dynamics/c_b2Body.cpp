@@ -79,8 +79,8 @@ void box2d_Body_SetLinearVelocity(b2Body* self, const b2Vec2* v) {
 
 /// Get the linear velocity of the center of mass.
 /// @return the linear velocity of the center of mass.
-const b2Vec2* box2d_Body_GetLinearVelocity(const b2Body* self) {
-    return &self->GetLinearVelocity();
+const b2Vec2 box2d_Body_GetLinearVelocity(const b2Body* self) {
+    return self->GetLinearVelocity();
 }
 
 /// Set the angular velocity.
@@ -102,14 +102,14 @@ float32 box2d_Body_GetAngularVelocity(const b2Body* self) {
 /// @param point the world position of the point of application.
 /// @param wake also wake up the body
 void box2d_Body_ApplyForce(b2Body* self, const b2Vec2* force, const b2Vec2* point, bool wake) {
-    self->ApplyForce(*force, *point, wake);
+    self->ApplyForce(*force, *point/*, wake*/);
 }
 
 /// Apply a force to the center of mass. This wakes up the body.
 /// @param force the world force vector, usually in Newtons (N).
 /// @param wake also wake up the body
 void box2d_Body_ApplyForceToCenter(b2Body* self, const b2Vec2* force, bool wake) {
-    self->ApplyForceToCenter(*force, wake);
+    self->ApplyForceToCenter(*force/*, wake*/);
 }
 
 /// Apply a torque. This affects the angular velocity
@@ -118,7 +118,7 @@ void box2d_Body_ApplyForceToCenter(b2Body* self, const b2Vec2* force, bool wake)
 /// @param torque about the z-axis (out of the screen), usually in N-m.
 /// @param wake also wake up the body
 void box2d_Body_ApplyTorque(b2Body* self, float32 torque, bool wake) {
-    self->ApplyTorque(torque, wake);
+    self->ApplyTorque(torque/*, wake*/);
 }
 
 /// Apply an impulse at a point. This immediately modifies the velocity.
@@ -128,14 +128,14 @@ void box2d_Body_ApplyTorque(b2Body* self, float32 torque, bool wake) {
 /// @param point the world position of the point of application.
 /// @param wake also wake up the body
 void box2d_Body_ApplyLinearImpulse(b2Body* self, const b2Vec2* impulse, const b2Vec2* point, bool wake) {
-    self->ApplyLinearImpulse(*impulse, *point, wake);
+    self->ApplyLinearImpulse(*impulse, *point/*, wake*/);
 }
 
 /// Apply an angular impulse.
 /// @param impulse the angular impulse in units of kg*m*m/s
 /// @param wake also wake up the body
 void box2d_Body_ApplyAngularImpulse(b2Body* self, float32 impulse, bool wake) {
-    self->ApplyAngularImpulse(impulse, wake);
+    self->ApplyAngularImpulse(impulse/*, wake*/);
 }
 
 /// Get the total mass of the body.
