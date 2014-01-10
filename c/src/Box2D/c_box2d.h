@@ -1,0 +1,8 @@
+#include "Box2D/Common/c_box2d_settings.h"
+#include "Box2D/Common/c_box2d_math.h"
+#include "Box2D/Collision/Shapes/c_box2d_polygonshape.h"
+#include "Box2D/Collision/Shapes/c_box2d_shape.h"
+#include "Box2D/Dynamics/Joints/c_box2d_joint.h"
+#include "Box2D/Dynamics/c_box2d_body.h"
+#include "Box2D/Dynamics/c_box2d_world.h"
+#include "Box2D/Dynamics/c_box2d_fixture.h"
