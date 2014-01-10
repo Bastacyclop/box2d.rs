@@ -15,6 +15,9 @@ typedef struct box2d_PolygonShape {
 
 box2d_PolygonShape box2d_PolygonShape_Create();
 
+box2d_Shape* box2d_PolygonShape_Upcast(box2d_PolygonShape* s);
+const box2d_Shape* box2d_PolygonShapeas_Upcast_const(const box2d_PolygonShape* s);
+
 /// @see b2Shape::GetChildCount
 int32 box2d_PolygonShape_GetChildCount(const box2d_PolygonShape* self);
 

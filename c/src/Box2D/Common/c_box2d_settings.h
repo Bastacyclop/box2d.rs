@@ -72,7 +72,9 @@ typedef struct b2Draw box2d_Draw;
 typedef struct b2RayCastCallback box2d_RayCastCallback;
 typedef struct b2QueryCallback box2d_QueryCallback;
 
+#ifndef NULL
 #define NULL            0
+#endif
 #define b2_maxFloat     FLT_MAX
 #define b2_epsilon      FLT_EPSILON
 #define b2_pi           3.14159265359f

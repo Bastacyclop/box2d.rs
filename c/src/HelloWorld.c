@@ -34,7 +34,7 @@ int main(int argc, char** argv)
     box2d_PolygonShape_SetAsBox(&groundBox, 50.0f, 10.0f);
 
     // Add the ground fixture to the ground body.
-    box2d_Body_CreateFixture_shape(groundBody, &groundBox, 0.0f);
+    box2d_Body_CreateFixture_shape(groundBody, box2d_PolygonShape_Upcast(&groundBox), 0.0f);
 
     // Define the dynamic body. We set its position and call the body factory.
     box2d_BodyDef bodyDef;
@@ -49,7 +49,7 @@ int main(int argc, char** argv)
 
     // Define the dynamic body fixture.
     box2d_FixtureDef fixtureDef;
-    fixtureDef.shape = &dynamicBox;
+    fixtureDef.shape = box2d_PolygonShape_Upcast(&dynamicBox);
 
     // Set the box density to be non-zero, so it will be dynamic.
     fixtureDef.density = 1.0f;

@@ -2,6 +2,14 @@
 
 extern "C" {
 
+box2d_Shape* box2d_PolygonShape_Upcast(box2d_PolygonShape* s) {
+	return static_cast<b2Shape*>(reinterpret_cast<b2PolygonShape*>(s));
+}
+
+const box2d_Shape* box2d_PolygonShape_Upcast_const(const box2d_PolygonShape* s) {
+	return static_cast<const b2Shape*>(reinterpret_cast<const b2PolygonShape*>(s));
+}
+
 box2d_PolygonShape box2d_PolygonShape_Create() {
 	b2PolygonShape tmp;
 	return *cast(&tmp);
