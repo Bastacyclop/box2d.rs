@@ -71,7 +71,7 @@ typedef struct box2d_BodyDef {
 } box2d_BodyDef;
 
 /// This constructor sets the body definition default values.
-box2d_BodyDef box2d_BodyDef_create();
+box2d_BodyDef box2d_BodyDef_Create();
 
 /// Creates a fixture and attach it to this body. Use this function if you need
 /// to set some fixture parameters, like friction. Otherwise you can create the

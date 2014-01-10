@@ -15,10 +15,10 @@ int main(int argc, char** argv)
     box2d_Vec2 gravity = { 0.0f, -10.0f };
 
     // Construct a world object, which will hold and simulate the rigid bodies.
-    box2d_World* world = box2d_World_create(gravity);
+    box2d_World* world = box2d_World_Create(&gravity);
 
     // Define the ground body.
-    box2d_BodyDef groundBodyDef = box2d_BodyDef_create();
+    box2d_BodyDef groundBodyDef = box2d_BodyDef_Create();
     groundBodyDef.position.x = 0.0f;
     groundBodyDef.position.y = -10.0f;
 
@@ -45,7 +45,7 @@ int main(int argc, char** argv)
 
     // Define another box shape for our dynamic body.
     box2d_PolygonShape dynamicBox = box2d_PolygonShape_Create();
-    box2d_PlygonShape_SetAsBox(&dynamicBox, 1.0f, 1.0f);
+    box2d_PolygonShape_SetAsBox(&dynamicBox, 1.0f, 1.0f);
 
     // Define the dynamic body fixture.
     box2d_FixtureDef fixtureDef;
@@ -87,7 +87,7 @@ int main(int argc, char** argv)
     // When the world destructor is called, all bodies and joints are freed. This can
     // create orphaned pointers, so be careful about your world management.
 
-    box2d_World_destroy(world);
+    box2d_World_Destroy(world);
 
     return 0;
 }

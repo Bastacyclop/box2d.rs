@@ -3,7 +3,7 @@
 
 extern "C" {
 
-box2d_BodyDef box2d_BodyDef_create()
+box2d_BodyDef box2d_BodyDef_Create()
 {
     box2d_BodyDef result;
     result.userData = NULL;

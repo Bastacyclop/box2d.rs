@@ -3,12 +3,12 @@ extern "C"
 
 /// Construct a world object.
 /// @param gravity the world gravity vector.
-box2d_World* box2d_World_ctor(const box2d_Vec2* gravity) {
+box2d_World* box2d_World_Create(const box2d_Vec2* gravity) {
     return new box2d_World(*cast(gravity));
 }
 
 /// Destruct the world. All physics entities are destroyed and all heap memory is released.
-void box2d_World_dtor(box2d_World* self) {
+void box2d_World_Destroy(box2d_World* self) {
     delete self;
 }
 
