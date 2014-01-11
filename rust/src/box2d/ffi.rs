@@ -1,10 +1,24 @@
 #[link(name="cbox2d", kind="static")]
 
+use std::cast;
+
+static PI: f32 = 3.14159265359;
+static MAX_MANIFOLD_POINTS: i32 = 2;
+static MAX_POLYGON_VERTICES: i32 = 8;
+static AABB_EXTENSION: f32 = 0.1;
+static AABB_MULTIPLIER: f32 = 2.0;
+static LINEAR_STOP: f32 = 0.005;
+static ANGULAR_STOP: f32 = (2.0 / 180.0 * PI);
+static POLYGON_RADIUS: f32 = (2.0 * LINEAR_STOP);
+static MAX_SUBSTEPS: i32 = 8;
+
+#[deriving(Eq, Ord)]
 struct Vec2 {
     x: f32,
     y: f32,
 }
 
+#[deriving(Eq, Ord)]
 struct Vec3 {
     x: f32,
     y: f32,
@@ -12,6 +26,8 @@ struct Vec3 {
 }
 
 type box2d_bool = u8;
+fn box2d_bool(b: bool) -> box2d_bool { if b {1} else {0} }
+
 struct box2d_Filter;
 struct box2d_PolygonShape;
 struct box2d_BodyDef;
@@ -59,8 +75,14 @@ static WELD_JOINT: JointType         = 8 as JointType;
 static FRICTION_JOINT: JointType     = 9 as JointType;
 static ROPE_JOINT: JointType         = 10 as JointType;
 
-type FixtureType = i32;
+type ShapeType = i32;
+static CIRCLE_SHAPE: ShapeType  = 0 as ShapeType;
+static EDGE_SHAPE: ShapeType    = 1 as ShapeType;
+static POLYGON_SHAPE: ShapeType = 2 as ShapeType;
+static CHAIN_SHAPE: ShapeType   = 3 as ShapeType;
 
+
+type UserData = *i32;
 
 struct BodyDef {
     /// The body type: static, kinematic, or dynamic.
@@ -104,16 +126,37 @@ struct BodyDef {
     /// other moving bodies? Note that all bodies are prevented from tunneling through
     /// kinematic and static bodies. This setting is only considered on dynamic bodies.
     /// @warning You should use this flag sparingly since it increases processing time.
-    bullet: *bool,
+    bullet: bool,
 
     /// Does this body start out active?
-    active: *bool,
+    active: bool,
 
     /// Use this to store application specific body data.
-    user_data: *box2d_UserData,
+    user_data: Option<UserData>,
 
     /// Scale the gravity applied to this body.
     gravity_scale : f32,
+}
+
+impl BodyDef {
+    fn default() -> BodyDef {
+        return BodyDef {
+            user_data: None,
+            position: Vec2 {x: 0.0, y:0.0},
+            angle: 0.0,
+            linear_velocity: Vec2 {x:0.0, y:0.0},
+            angular_velocity: 0.0,
+            linear_damping: 0.0,
+            angular_damping: 0.0,
+            allow_sleep: true,
+            awake: true,
+            fixed_rotation: false,
+            bullet: false,
+            body_type: STATIC_BODY,
+            active: true,
+            gravity_scale: 1.0,
+        };
+    }
 }
 
 struct JointDef {
@@ -149,13 +192,13 @@ struct Filter {
 
 /// A fixture definition is used to create a fixture. This class defines an
 /// abstract fixture definition. You can reuse fixture definitions safely.
-struct FixtureDef {
+struct FixtureDef<'l> {
     /// The shape, this must be set. The shape will be cloned, so you
     /// can create the shape on the stack.
-    shape: *box2d_Shape,
+    shape: &'l box2d_Shape,
 
     /// Use this to store application specific fixture data.
-    userData: *box2d_UserData,
+    userData: Option<UserData>,
 
     /// The friction coefficient, usually in the range [0,1].
     friction: f32,
@@ -172,6 +215,67 @@ struct FixtureDef {
 
     /// Contact filtering data.
     filter: Filter,
+}
+
+impl<'l> FixtureDef<'l> {
+    fn default<'l>(s: &'l box2d_Shape) -> FixtureDef<'l> {
+        return FixtureDef {
+            shape: s,
+            userData: None,
+            friction: 0.0,
+            restitution: 0.0,
+            density: 0.0,
+            is_sensor: false,
+            filter: Filter {
+                category_bits: 0x0001,
+                mask_bits: 0xFFFF,
+                group_index: 0,
+            },
+        };
+    }
+}
+
+struct PolygonShape {
+    centroid: Vec2,
+    vertices: [Vec2, ..MAX_POLYGON_VERTICES],
+    normals: [Vec2, ..MAX_POLYGON_VERTICES],
+    vertex_count: i32,
+}
+
+impl PolygonShape {
+    fn default() -> PolygonShape {
+        return PolygonShape {
+            centroid: Vec2 {x:0.0, y:0.0},
+            vertices: [
+                Vec2 {x:0.0, y:0.0},
+                Vec2 {x:0.0, y:0.0},
+                Vec2 {x:0.0, y:0.0},
+                Vec2 {x:0.0, y:0.0},
+                Vec2 {x:0.0, y:0.0},
+                Vec2 {x:0.0, y:0.0},
+                Vec2 {x:0.0, y:0.0},
+                Vec2 {x:0.0, y:0.0},
+            ],
+            normals: [
+                Vec2 {x:0.0, y:0.0},
+                Vec2 {x:0.0, y:0.0},
+                Vec2 {x:0.0, y:0.0},
+                Vec2 {x:0.0, y:0.0},
+                Vec2 {x:0.0, y:0.0},
+                Vec2 {x:0.0, y:0.0},
+                Vec2 {x:0.0, y:0.0},
+                Vec2 {x:0.0, y:0.0},
+            ],
+            vertex_count: 0,
+        }
+    }
+    fn box_shape(w:f32, h:f32) -> PolygonShape {
+        let result = PolygonShape::default();
+        unsafe {
+            box2d_PolygonShape_SetAsBox(cast::transmute(&result), w, h);
+        }
+        return result;
+    }
 }
 
 extern {
@@ -192,7 +296,7 @@ extern {
     fn box2d_World_QueryAABB(this: *box2d_World, cb: *box2d_QueryCallback, aabb: *box2d_AABB);
     fn box2d_World_RayCast(this: *box2d_World, cb: *box2d_RayCastCallback, p1: *Vec2, p2: *Vec2);
     fn box2d_World_GetBodyList(this: *box2d_World) -> *box2d_Body;
-    fn box2d_World_GetJointList(this: *box2d_World) -> box2d_Joint;
+    fn box2d_World_GetJointList(this: *box2d_World) -> *box2d_Joint;
     fn box2d_World_GetContactList(this: *box2d_World) -> *box2d_Contact;
     fn box2d_World_SetAllowSleeping(this: *box2d_World, flag: box2d_bool);
     fn box2d_World_GetAllowSleeping(this: *box2d_World) -> box2d_bool;
@@ -291,7 +395,7 @@ extern {
     fn box2d_PolygonShape_GetVertex(this: *box2d_PolygonShape, index: i32) -> *Vec2;
     // b2Fixture
     fn box2d_FixtureDef_create() -> box2d_FixtureDef;
-    fn box2d_Fixture_GetType(this: *box2d_Fixture) -> FixtureType;
+    fn box2d_Fixture_GetType(this: *box2d_Fixture) -> ShapeType;
     fn box2d_Fixture_GetShape(this: *box2d_Fixture) -> *box2d_Shape;
     fn box2d_Fixture_SetSensor(this: *box2d_Fixture, sensor: box2d_bool);
     fn box2d_Fixture_IsSensor(this: *box2d_Fixture) -> box2d_bool;
@@ -328,7 +432,6 @@ extern {
     fn box2d_Joint_IsActive(this: *box2d_Joint) -> box2d_bool;
     fn box2d_Joint_GetCollideConnected(this: *box2d_Joint) -> box2d_bool;
     fn box2d_Joint_Dump(this: *box2d_Joint);
-
 }
 
 
@@ -346,6 +449,10 @@ struct Body {
 
 struct Fixture {
     ptr: *box2d_Fixture,
+}
+
+struct Contact {
+    ptr: *box2d_Contact,
 }
 
 impl Drop for World {
@@ -384,24 +491,24 @@ impl World {
             box2d_World_SetDebugDraw(self.ptr, debug_draw);
         }
     }
-    fn create_body(&mut self, def: *box2d_BodyDef) -> Body {
+    fn create_body(&mut self, def: &BodyDef) -> Body {
         unsafe {
-            return Body { ptr: box2d_World_CreateBody(self.ptr, def) };
+            return Body { ptr: box2d_World_CreateBody(self.ptr, cast::transmute(def)) };
         }
     }
-    fn create_joint(&mut self, def: *JointDef) -> Joint {
+    fn create_joint(&mut self, def: &JointDef) -> Joint {
         unsafe {
-            return Joint { ptr: box2d_World_CreateJoint(self.ptr, def) };
+            return Joint { ptr: box2d_World_CreateJoint(self.ptr, cast::transmute(def)) };
         }
     }
-    fn destroy_joint(&mut self, joint: *box2d_Joint) {
+    fn destroy_joint(&mut self, joint: &mut Joint) {
         unsafe {
-            box2d_World_DestroyJoint(self.ptr, joint);
+            box2d_World_DestroyJoint(self.ptr, joint.ptr);
         }
     }
-    fn destroy_body(&mut self, body: *box2d_Body) {
+    fn destroy_body(&mut self, body: &mut Body) {
         unsafe {
-            box2d_World_DestroyBody(self.ptr, body);
+            box2d_World_DestroyBody(self.ptr, body.ptr);
         }
     }
     fn step(&mut self, time_step: f32, velocity_iterations: i32, position_iterations: i32) {
@@ -429,19 +536,19 @@ impl World {
             box2d_World_RayCast(self.ptr, cb, &p1, &p2);
         }
     }
-    fn get_body_list(&self) -> *box2d_Body {
+    fn get_body_list(&self) -> Body {
         unsafe {
-            return box2d_World_GetBodyList(self.ptr);
+            return Body{ptr:box2d_World_GetBodyList(self.ptr)};
         }
     }
-    fn get_joint_list(&self) -> box2d_Joint {
+    fn get_joint_list(&self) -> Joint {
         unsafe {
-            return box2d_World_GetJointList(self.ptr);
+            return Joint {ptr:box2d_World_GetJointList(self.ptr)};
         }
     }
-    fn get_contact_list(&self) -> *box2d_Contact {
+    fn get_contact_list(&self) -> Contact {
         unsafe {
-            return box2d_World_GetContactList(self.ptr);
+            return Contact { ptr:box2d_World_GetContactList(self.ptr) };
         }
     }
     fn set_allow_sleeping(&mut self, flag: bool) {
@@ -529,9 +636,9 @@ impl World {
             return box2d_World_GetGravity(self.ptr);
         }
     }
-    fn is_locked(&self) -> box2d_bool {
+    fn is_locked(&self) -> bool {
         unsafe {
-            return box2d_World_IsLocked(self.ptr);
+            return box2d_World_IsLocked(self.ptr) != 0;
         }
     }
     fn set_auto_clear_forces(&mut self, flag: bool) {
@@ -561,8 +668,148 @@ impl World {
     }
 }
 
-fn main () {
-    let mut world = World::new(Vec2 { x:0.0, y:-1.0 });
+impl Fixture {
+    fn get_type(&self) -> ShapeType {
+        unsafe {
+            return box2d_Fixture_GetType(self.ptr) as ShapeType;
+        }
+    }
+    fn get_shape(&self) -> *box2d_Shape {
+        unsafe {
+            return box2d_Fixture_GetShape(self.ptr);
+        }
+    }
+    fn set_sensor(&self, sensor: bool) {
+        unsafe {
+            box2d_Fixture_SetSensor(self.ptr, box2d_bool(sensor));
+        }
+    }
+    fn is_sensor(&self) -> bool {
+        unsafe {
+            return box2d_Fixture_IsSensor(self.ptr) != 0;
+        }
+    }
+    fn set_filter_data(&self, filter: *box2d_Filter) {
+        unsafe {
+            box2d_Fixture_SetFilterData(self.ptr, filter);
+        }
+    }
+    fn get_filter_data(&self) -> *box2d_Filter {
+        unsafe {
+            return box2d_Fixture_GetFilterData(self.ptr);
+        }
+    }
+    fn refilter(&self) {
+        unsafe {
+            box2d_Fixture_Refilter(self.ptr);
+        }
+    }
+    fn get_body(&self) -> Body {
+        unsafe {
+            return Body { ptr: box2d_Fixture_GetBody(self.ptr) };
+        }
+    }
+    fn get_next(&self) -> Fixture {
+        unsafe {
+            return Fixture { ptr: box2d_Fixture_GetNext(self.ptr) };
+        }
+    }
+    fn get_user_data(&self) -> *box2d_UserData {
+        unsafe {
+            return box2d_Fixture_GetUserData(self.ptr);
+        }
+    }
+    fn set_user_data(&self, data: *box2d_UserData) {
+        unsafe {
+            box2d_Fixture_SetUserData(self.ptr, data);
+        }
+    }
+    fn test_point(&self,  p: Vec2) -> bool {
+        unsafe {
+            return box2d_Fixture_TestPoint(self.ptr, cast::transmute(&p)) != 0;
+        }
+    }
+    fn ray_cast(&self, output: *box2d_RayCastOutput, input: *box2d_RayCastInput, child_index: i32) -> bool {
+        unsafe {
+            return box2d_Fixture_RayCast(self.ptr, output, input, child_index) != 0;
+        }
+    }
+    fn get_mass_data(&self, data: &box2d_MassData) {
+        unsafe {
+            return box2d_Fixture_GetMassData(self.ptr, cast::transmute(data));
+        }
+    }
+    fn set_density(&self, density: f32) {
+        unsafe {
+            box2d_Fixture_SetDensity(self.ptr, density);
+        }
+    }
+    fn get_density(&self) -> f32 {
+        unsafe {
+            return box2d_Fixture_GetDensity(self.ptr);
+        }
+    }
+    fn get_friction(&self) -> f32 {
+        unsafe {
+            return box2d_Fixture_GetFriction(self.ptr);
+        }
+    }
+    fn set_friction(&self, friction: f32) {
+        unsafe {
+            box2d_Fixture_SetFriction(self.ptr, friction);
+        }
+    }
+    fn get_restitution(&self) -> f32 {
+        unsafe {
+            return box2d_Fixture_GetRestitution(self.ptr);
+        }
+    }
+    fn set_restitution(&self, restitution: f32) {
+        unsafe {
+            box2d_Fixture_SetRestitution(self.ptr, restitution);
+        }
+    }
+    fn get_aabb(&self, child_index: i32) -> *box2d_AABB {
+        unsafe {
+            return box2d_Fixture_GetAABB(self.ptr, child_index);
+        }
+    }
+    fn dump(&self, body_index: i32) {
+        unsafe {
+            box2d_Fixture_Dump(self.ptr, body_index);
+        }
+    }
+}
 
+fn main () {
+    println("Rust box2d test...");
+    let gravity = Vec2 { x:0.0, y:-1.0 };
+    let mut world = World::new(gravity);
+
+    // Prepare for simulation. Typically we use a time step of 1/60 of a
+    // second (60Hz) and 10 iterations. This provides a high quality simulation
+    // in most game scenarios.
+    let time_step = 1.0f32 / 60.0f32;
+    let velocity_iterations = 6;
+    let position_iterations = 2;
+
+    assert_eq!(world.get_body_count(), 0);
+    assert_eq!(world.get_gravity(), gravity);
+
+    let mut body_def = BodyDef::default();
+    let mut b1 = world.create_body(&body_def);
+
+    let shape = PolygonShape::box_shape(2.0, 3.0);
+
+    assert_eq!(world.get_body_count(), 1);
+
+    for i in range(0, 60) {
+        println(" -- step");
+        world.step(time_step, velocity_iterations, position_iterations);
+    }
+
+    world.destroy_body(&mut b1);
+    assert_eq!(world.get_body_count(), 0);
     // ...
+    // RAII takes car of destroying the world
 }
