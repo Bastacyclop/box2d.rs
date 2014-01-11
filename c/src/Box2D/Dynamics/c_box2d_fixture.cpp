@@ -111,7 +111,7 @@ float32 box2d_Fixture_GetRestitution(const box2d_Fixture* self) {
     return self->GetRestitution();
 }
 
-void SetRestitution(box2d_Fixture* self, float32 restitution) {
+void box2d_Fixture_SetRestitution(box2d_Fixture* self, float32 restitution) {
     self->SetRestitution(restitution);
 }
 

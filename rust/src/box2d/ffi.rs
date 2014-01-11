@@ -176,14 +176,14 @@ struct FixtureDef {
 
 extern {
     // b2World
-    fn box2d_World_Create(gravity: *Vec2) -> *mut box2d_World;
-    fn box2d_World_Destroy(world: *mut box2d_World);
+    fn box2d_World_Create(gravity: *Vec2) -> *box2d_World;
+    fn box2d_World_Destroy(world: *box2d_World);
     fn box2d_World_SetDestructionListener(this: *box2d_World, listener: *box2d_DestructionListener);
     fn box2d_World_SetContactFilter(this: *box2d_World, filter: *box2d_ContactFilter);
     fn box2d_World_SetContactListener(this: *box2d_World, listener: *box2d_ContactListener);
     fn box2d_World_SetDebugDraw(this: *box2d_World, debugdraw: *box2d_Draw);
     fn box2d_World_CreateBody(this: *box2d_World, def: *box2d_BodyDef) -> *box2d_Body;
-    fn box2d_World_CreateJoint(this: *box2d_World, def: *JointDef) -> box2d_Joint;
+    fn box2d_World_CreateJoint(this: *box2d_World, def: *JointDef) -> *box2d_Joint;
     fn box2d_World_DestroyJoint(this: *box2d_World, joint: *box2d_Joint);
     fn box2d_World_DestroyBody(this: *box2d_World, body: *box2d_Body);
     fn box2d_World_Step(this: *box2d_World, timeStep: f32, velocityIterations: i32, positionIterations: i32);
@@ -311,7 +311,7 @@ extern {
     fn box2d_Fixture_GetFriction(this: *box2d_Fixture) -> f32;
     fn box2d_Fixture_SetFriction(this: *box2d_Fixture, friction: f32);
     fn box2d_Fixture_GetRestitution(this: *box2d_Fixture) -> f32;
-    fn SetRestitution(this: *box2d_Fixture, restitution: f32);
+    fn box2d_Fixture_SetRestitution(this: *box2d_Fixture, restitution: f32);
     fn box2d_Fixture_GetAABB(this: *box2d_Fixture, childIndex: i32) -> *box2d_AABB;
     fn box2d_Fixture_Dump(this: *box2d_Fixture, bodyIndex: i32);
     // b2Joint
@@ -331,10 +331,238 @@ extern {
 
 }
 
-fn main () {
-    unsafe {
-        let v = Vec2 { x:0.0, y:0.0 };
-        let world = box2d_World_Create(&v);
-        box2d_World_Destroy(world);
+
+struct World {
+    ptr: *box2d_World,
+}
+
+struct Joint {
+    ptr: *box2d_Joint,
+}
+
+struct Body {
+    ptr: *box2d_Body,
+}
+
+struct Fixture {
+    ptr: *box2d_Fixture,
+}
+
+impl Drop for World {
+    fn drop(&mut self) {
+        unsafe {
+            box2d_World_Destroy(self.ptr);
+        }
     }
+}
+
+impl World {
+    fn new(gravity: Vec2) -> World {
+        unsafe {
+            let w: *box2d_World = box2d_World_Create(&gravity);
+            return World { ptr:w };
+        }
+    }
+
+    fn set_destruction_listener(&self, listener: *box2d_DestructionListener) {
+        unsafe {
+            box2d_World_SetDestructionListener(self.ptr, listener);
+        }
+    }
+    fn set_contact_filter(&mut self, filter: *box2d_ContactFilter) {
+        unsafe {
+            box2d_World_SetContactFilter(self.ptr, filter);
+        }
+    }
+    fn set_contact_listener(&mut self, listener: *box2d_ContactListener) {
+        unsafe {
+            box2d_World_SetContactListener(self.ptr, listener);
+        }
+    }
+    fn set_debug_draw(&mut self, debug_draw: *box2d_Draw) {
+        unsafe {
+            box2d_World_SetDebugDraw(self.ptr, debug_draw);
+        }
+    }
+    fn create_body(&mut self, def: *box2d_BodyDef) -> Body {
+        unsafe {
+            return Body { ptr: box2d_World_CreateBody(self.ptr, def) };
+        }
+    }
+    fn create_joint(&mut self, def: *JointDef) -> Joint {
+        unsafe {
+            return Joint { ptr: box2d_World_CreateJoint(self.ptr, def) };
+        }
+    }
+    fn destroy_joint(&mut self, joint: *box2d_Joint) {
+        unsafe {
+            box2d_World_DestroyJoint(self.ptr, joint);
+        }
+    }
+    fn destroy_body(&mut self, body: *box2d_Body) {
+        unsafe {
+            box2d_World_DestroyBody(self.ptr, body);
+        }
+    }
+    fn step(&mut self, time_step: f32, velocity_iterations: i32, position_iterations: i32) {
+        unsafe {
+            box2d_World_Step(self.ptr, time_step, velocity_iterations, position_iterations);
+        }
+    }
+    fn clear_forces(&mut self) {
+        unsafe {
+            box2d_World_ClearForces(self.ptr);
+        }
+    }
+    fn draw_debug_data(&self) {
+        unsafe {
+            box2d_World_DrawDebugData(self.ptr);
+        }
+    }
+    fn query_aabb(&self, cb: *box2d_QueryCallback, aabb: *box2d_AABB) {
+        unsafe {
+            box2d_World_QueryAABB(self.ptr, cb, aabb);
+        }
+    }
+    fn ray_cast(&self, cb: *box2d_RayCastCallback, p1: Vec2, p2: Vec2) {
+        unsafe {
+            box2d_World_RayCast(self.ptr, cb, &p1, &p2);
+        }
+    }
+    fn get_body_list(&self) -> *box2d_Body {
+        unsafe {
+            return box2d_World_GetBodyList(self.ptr);
+        }
+    }
+    fn get_joint_list(&self) -> box2d_Joint {
+        unsafe {
+            return box2d_World_GetJointList(self.ptr);
+        }
+    }
+    fn get_contact_list(&self) -> *box2d_Contact {
+        unsafe {
+            return box2d_World_GetContactList(self.ptr);
+        }
+    }
+    fn set_allow_sleeping(&mut self, flag: bool) {
+        unsafe {
+            box2d_World_SetAllowSleeping(self.ptr, if flag {1} else {0});
+        }
+    }
+    fn get_allow_sleeping(&self) -> bool {
+        unsafe {
+            return box2d_World_GetAllowSleeping(self.ptr) != 0;
+        }
+    }
+    fn set_warm_starting(&mut self, flag: bool) {
+        unsafe {
+            box2d_World_SetWarmStarting(self.ptr, if flag {1} else {0});
+        }
+    }
+    fn get_warm_starting(&self) -> bool {
+        unsafe {
+            return box2d_World_GetWarmStarting(self.ptr) != 0;
+        }
+    }
+    fn set_continuous_Physics(&mut self, flag: bool) {
+        unsafe {
+            box2d_World_SetContinuousPhysics(self.ptr, if flag {1} else {0});
+        }
+    }
+    fn get_continuous_Physics(&self) -> bool {
+        unsafe {
+            return box2d_World_GetContinuousPhysics(self.ptr) != 0;
+        }
+    }
+    fn set_sub_stepping(&mut self, flag: bool) {
+        unsafe {
+            box2d_World_SetSubStepping(self.ptr, if flag {1} else {0});
+        }
+    }
+    fn get_sub_stepping(&self) -> bool {
+        unsafe {
+            return box2d_World_GetSubStepping(self.ptr) != 0;
+        }
+    }
+    fn get_proxy_count(&self) -> i32 {
+        unsafe {
+            return box2d_World_GetProxyCount(self.ptr);
+        }
+    }
+    fn get_body_count(&self) -> i32 {
+        unsafe {
+            return box2d_World_GetBodyCount(self.ptr);
+        }
+    }
+    fn get_joint_count(&self) -> i32 {
+        unsafe {
+            return box2d_World_GetJointCount(self.ptr);
+        }
+    }
+    fn get_contact_count(&self) -> i32 {
+        unsafe {
+            return box2d_World_GetContactCount(self.ptr);
+        }
+    }
+    fn get_tree_height(&self) -> i32 {
+        unsafe {
+            return box2d_World_GetTreeHeight(self.ptr);
+        }
+    }
+    fn get_tree_balance(&self) -> i32 {
+        unsafe {
+            return box2d_World_GetTreeBalance(self.ptr);
+        }
+    }
+    fn get_tree_quality(&self) -> f32 {
+        unsafe {
+            return box2d_World_GetTreeQuality(self.ptr);
+        }
+    }
+    fn set_gravity(&mut self, gravity: Vec2) {
+        unsafe {
+            box2d_World_SetGravity(self.ptr, &gravity);
+        }
+    }
+    fn get_gravity(&self) -> Vec2 {
+        unsafe {
+            return box2d_World_GetGravity(self.ptr);
+        }
+    }
+    fn is_locked(&self) -> box2d_bool {
+        unsafe {
+            return box2d_World_IsLocked(self.ptr);
+        }
+    }
+    fn set_auto_clear_forces(&mut self, flag: bool) {
+        unsafe {
+            box2d_World_SetAutoClearForces(self.ptr, if flag {1} else {0});
+        }
+    }
+    fn get_auto_clear_forces(&self) -> bool {
+        unsafe {
+            return box2d_World_GetAutoClearForces(self.ptr) != 0;
+        }
+    }
+    fn get_contact_manager(&self) -> *box2d_ContactManager {
+        unsafe {
+            return box2d_World_GetContactManager(self.ptr);
+        }
+    }
+    fn get_profile(&self) -> *box2d_Profile {
+        unsafe {
+            return box2d_World_GetProfile(self.ptr);
+        }
+    }
+    fn dump(&self) {
+        unsafe {
+            box2d_World_Dump(self.ptr);
+        }
+    }
+}
+
+fn main () {
+    let mut world = World::new(Vec2 { x:0.0, y:-1.0 });
+
+    // ...
 }
