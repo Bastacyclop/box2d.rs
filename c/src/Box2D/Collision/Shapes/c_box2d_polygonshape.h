@@ -2,18 +2,14 @@
 #ifndef C_BOX2D_POLYGONSHAPE
 #define C_BOX2D_POLYGONSHAPE
 
+#include "Box2D/Common/c_box2d_settings.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef struct box2d_PolygonShape {
-    box2d_Vec2 m_centroid;
-    box2d_Vec2 m_vertices[b2_maxPolygonVertices];
-    box2d_Vec2 m_normals[b2_maxPolygonVertices];
-    int32 m_vertexCount;
-} box2d_PolygonShape;
-
-box2d_PolygonShape box2d_PolygonShape_Create();
+box2d_PolygonShape* box2d_PolygonShape_Create();
+void box2d_PolygonShape_Destroy(box2d_PolygonShape* s);
 
 box2d_Shape* box2d_PolygonShape_Upcast(box2d_PolygonShape* s);
 const box2d_Shape* box2d_PolygonShapeas_Upcast_const(const box2d_PolygonShape* s);
@@ -38,7 +34,7 @@ void box2d_PolygonShape_SetAsBox(box2d_PolygonShape* self, float32 hx, float32 h
 /// @param hy the half-height.
 /// @param center the center of the box in local coordinates.
 /// @param angle the rotation of the box in local coordinates.
-void box2d_PolygonShape_SetAsBox_2(box2d_PolygonShape* self, float32 hx, float32 hy, const box2d_Vec2* center, float32 angle);
+void box2d_PolygonShape_SetAsOrientedBox(box2d_PolygonShape* self, float32 hx, float32 hy, const box2d_Vec2* center, float32 angle);
 
 /// Get the vertex count.
 int32 box2d_PolygonShape_GetVertexCount(const box2d_PolygonShape* self);

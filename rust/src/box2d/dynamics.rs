@@ -91,7 +91,7 @@ pub struct BodyDef {
     active: bool,
 
     /// Use this to store application specific body data.
-    user_data: Option<common::UserData>,
+    user_data: *ffi::box2d_UserData,
 
     /// Scale the gravity applied to this body.
     gravity_scale : f32,
@@ -99,22 +99,24 @@ pub struct BodyDef {
 
 impl BodyDef {
     pub fn default() -> BodyDef {
-        return BodyDef {
-            user_data: None,
-            position: Vec2 {x: 0.0, y:0.0},
-            angle: 0.0,
-            linear_velocity: Vec2 {x:0.0, y:0.0},
-            angular_velocity: 0.0,
-            linear_damping: 0.0,
-            angular_damping: 0.0,
-            allow_sleep: true,
-            awake: true,
-            fixed_rotation: false,
-            bullet: false,
-            body_type: STATIC_BODY,
-            active: true,
-            gravity_scale: 1.0,
-        };
+        unsafe {
+            return BodyDef {
+                user_data: cast::transmute(0),
+                position: Vec2 {x: 0.0, y:0.0},
+                angle: 0.0,
+                linear_velocity: Vec2 {x:0.0, y:0.0},
+                angular_velocity: 0.0,
+                linear_damping: 0.0,
+                angular_damping: 0.0,
+                allow_sleep: true,
+                awake: true,
+                fixed_rotation: false,
+                bullet: false,
+                body_type: STATIC_BODY,
+                active: true,
+                gravity_scale: 1.0,
+            };
+        }
     }
 }
 
@@ -157,7 +159,7 @@ pub struct FixtureDef<'l> {
     shape: &'l ffi::box2d_Shape,
 
     /// Use this to store application specific fixture data.
-    userData: Option<common::UserData>,
+    userData: *ffi::box2d_UserData,
 
     /// The friction coefficient, usually in the range [0,1].
     friction: f32,
@@ -177,20 +179,22 @@ pub struct FixtureDef<'l> {
 }
 
 impl<'l> FixtureDef<'l> {
-    pub fn default<'l>(s: &'l ffi::box2d_Shape) -> FixtureDef<'l> {
-        return FixtureDef {
-            shape: s,
-            userData: None,
-            friction: 0.0,
-            restitution: 0.0,
-            density: 0.0,
-            is_sensor: false,
-            filter: Filter {
-                category_bits: 0x0001,
-                mask_bits: 0xFFFF,
-                group_index: 0,
-            },
-        };
+    pub fn default<'l>(s: &'l shapes::Shape) -> FixtureDef<'l> {
+        unsafe {
+            return FixtureDef {
+                shape: cast::transmute(s.handle()),
+                userData: cast::transmute(s.handle()), // TODO placeholder
+                friction: 0.0,
+                restitution: 0.0,
+                density: 0.0,
+                is_sensor: false,
+                filter: Filter {
+                    category_bits: 0x0001,
+                    mask_bits: 0xFFFF,
+                    group_index: 0,
+                },
+            };
+        }
     }
 }
 

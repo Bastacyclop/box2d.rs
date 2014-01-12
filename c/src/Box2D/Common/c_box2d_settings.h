@@ -25,6 +25,7 @@ struct b2RaycastInput;
 struct b2RaycastOutput;
 struct b2DestructionListener;
 struct b2Shape;
+struct b2PolygonShape;
 struct b2MassData;
 struct b2Transform;
 struct b2Joint;
@@ -45,7 +46,6 @@ struct box2d_Vec3;
 struct box2d_Mat2;
 struct box2d_Mat3;
 struct box2d_Filter;
-struct box2d_PolygonShape;
 struct box2d_BodyDef;
 struct box2d_FixtureDef;
 struct box2d_JointDef;
@@ -71,6 +71,7 @@ typedef struct b2Profile box2d_Profile;
 typedef struct b2Draw box2d_Draw;
 typedef struct b2RayCastCallback box2d_RayCastCallback;
 typedef struct b2QueryCallback box2d_QueryCallback;
+typedef struct b2PolygonShape box2d_PolygonShape;
 
 #ifndef NULL
 #define NULL            0

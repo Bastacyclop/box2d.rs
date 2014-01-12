@@ -133,7 +133,7 @@ float32 box2d_Fixture_GetRestitution(const box2d_Fixture* self);
 
 /// Set the coefficient of restitution. This will _not_ change the restitution of
 /// existing contacts.
-void SetRestitution(box2d_Fixture* self, float32 restitution);
+void box2d_Fixture_SetRestitution(box2d_Fixture* self, float32 restitution);
 
 /// Get the fixture's AABB. This AABB may be enlarge and/or stale.
 /// If you need a more accurate AABB, compute it using the shape and

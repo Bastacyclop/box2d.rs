@@ -142,7 +142,8 @@ extern {
     pub fn box2d_Shape_ComputeAABB(this: *box2d_Shape, aabb: *box2d_AABB, xf: *box2d_Transform, childIndex: i32);
     pub fn box2d_Shape_ComputeMass(this: *box2d_Shape, massData: *box2d_MassData, density: f32);
     // b2PolygonShape
-    pub fn box2d_PolygonShape_Create() -> box2d_PolygonShape;
+    pub fn box2d_PolygonShape_Create() -> *box2d_PolygonShape;
+    pub fn box2d_PolygonShape_Destroy(s: *box2d_PolygonShape);
     pub fn box2d_PolygonShape_Upcast(s: *box2d_PolygonShape) -> *box2d_Shape;
     pub fn box2d_PolygonShape_GetChildCount(this: *box2d_PolygonShape) -> i32;
     pub fn box2d_PolygonShape_Set(this: *box2d_PolygonShape,  points: *Vec2, count: i32);

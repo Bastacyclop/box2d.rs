@@ -10,13 +10,12 @@
 // with your rendering engine in your game engine.
 int main(int argc, char** argv)
 {
-    int i;
     // Define the gravity vector.
     box2d_Vec2 gravity = { 0.0f, -10.0f };
 
     // Construct a world object, which will hold and simulate the rigid bodies.
     box2d_World* world = box2d_World_Create(&gravity);
-
+/*
     // Define the ground body.
     box2d_BodyDef groundBodyDef = box2d_BodyDef_Create();
     groundBodyDef.position.x = 0.0f;
@@ -28,28 +27,27 @@ int main(int argc, char** argv)
     box2d_Body* groundBody = box2d_World_CreateBody(world, &groundBodyDef);
 
     // Define the ground box shape.
-    box2d_PolygonShape groundBox = box2d_PolygonShape_Create();
-
-    // The extents are the half-widths of the box.
-    box2d_PolygonShape_SetAsBox(&groundBox, 50.0f, 10.0f);
+    box2d_PolygonShape* groundBox = box2d_PolygonShape_Create();
+    box2d_PolygonShape_SetAsBox(groundBox, 50.0f, 10.0f);
 
     // Add the ground fixture to the ground body.
-    box2d_Body_CreateFixture_shape(groundBody, box2d_PolygonShape_Upcast(&groundBox), 0.0f);
+    box2d_Body_CreateFixture_shape(groundBody, box2d_PolygonShape_Upcast(groundBox), 0.0f);
+    //box2d_PolygonShape_Destroy(groundBox);
+*/
 
     // Define the dynamic body. We set its position and call the body factory.
-    box2d_BodyDef bodyDef;
+    box2d_BodyDef bodyDef = box2d_BodyDef_Create();
     bodyDef.type = box2d_dynamicBody;
     bodyDef.position.x = 0.0f;
     bodyDef.position.y = 4.0f;
     box2d_Body* body = box2d_World_CreateBody(world, &bodyDef);
-
     // Define another box shape for our dynamic body.
-    box2d_PolygonShape dynamicBox = box2d_PolygonShape_Create();
-    box2d_PolygonShape_SetAsBox(&dynamicBox, 1.0f, 1.0f);
+    box2d_PolygonShape* dynamicBox = box2d_PolygonShape_Create();
+    box2d_PolygonShape_SetAsBox(dynamicBox, 1.0f, 1.0f);
 
     // Define the dynamic body fixture.
     box2d_FixtureDef fixtureDef;
-    fixtureDef.shape = box2d_PolygonShape_Upcast(&dynamicBox);
+    fixtureDef.shape = box2d_PolygonShape_Upcast(dynamicBox);
 
     // Set the box density to be non-zero, so it will be dynamic.
     fixtureDef.density = 1.0f;
@@ -67,6 +65,7 @@ int main(int argc, char** argv)
     int32 velocityIterations = 6;
     int32 positionIterations = 2;
 
+    int i;
     // This is our little game loop.
     for (i = 0; i < 60; ++i)
     {
@@ -89,5 +88,6 @@ int main(int argc, char** argv)
 
     box2d_World_Destroy(world);
 
+    printf("sizeof fixtureDef: %i\n", (int)sizeof(box2d_BodyDef));
     return 0;
 }
