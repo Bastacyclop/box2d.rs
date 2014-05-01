@@ -1,7 +1,6 @@
 use std::cast;
-use math::{Vec2, Vec3};
+use math::Vec2;
 use super::ffi;
-use super::settings;
 use super::math;
 
 pub type ShapeType = i32;

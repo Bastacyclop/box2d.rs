@@ -79,24 +79,24 @@ float32 box2d_Body_GetAngularVelocity(const box2d_Body* self) {
 }
 
 void box2d_Body_ApplyForce(box2d_Body* self, const box2d_Vec2* force,
-                           const box2d_Vec2* point/*, box2d_bool wake*/) {
-    self->ApplyForce(*cast(force), *cast(point)/*, wake*/);
+                           const box2d_Vec2* point, box2d_bool wake) {
+    self->ApplyForce(*cast(force), *cast(point), wake);
 }
 
-void box2d_Body_ApplyForceToCenter(box2d_Body* self, const box2d_Vec2* force/*, box2d_bool wake*/) {
-    self->ApplyForceToCenter(*cast(force)/*, wake*/);
+void box2d_Body_ApplyForceToCenter(box2d_Body* self, const box2d_Vec2* force, box2d_bool wake) {
+    self->ApplyForceToCenter(*cast(force), wake);
 }
 
-void box2d_Body_ApplyTorque(box2d_Body* self, float32 torque/*, box2d_bool wake*/) {
-    self->ApplyTorque(torque/*, wake*/);
+void box2d_Body_ApplyTorque(box2d_Body* self, float32 torque, box2d_bool wake) {
+    self->ApplyTorque(torque, wake);
 }
 
-void box2d_Body_ApplyLinearImpulse(box2d_Body* self, const box2d_Vec2* impulse, const box2d_Vec2* point/*, box2d_bool wake*/) {
-    self->ApplyLinearImpulse(*cast(impulse), *cast(point)/*, wake*/);
+void box2d_Body_ApplyLinearImpulse(box2d_Body* self, const box2d_Vec2* impulse, const box2d_Vec2* point, box2d_bool wake) {
+    self->ApplyLinearImpulse(*cast(impulse), *cast(point), wake);
 }
 
-void box2d_Body_ApplyAngularImpulse(box2d_Body* self, float32 impulse/*, box2d_bool wake*/) {
-    self->ApplyAngularImpulse(impulse/*, wake*/);
+void box2d_Body_ApplyAngularImpulse(box2d_Body* self, float32 impulse, box2d_bool wake) {
+    self->ApplyAngularImpulse(impulse, wake);
 }
 
 float32 box2d_Body_GetMass(const box2d_Body* self) {

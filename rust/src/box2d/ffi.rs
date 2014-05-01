@@ -1,5 +1,4 @@
-use std::cast;
-use math::{Vec2, Vec3};
+use math::Vec2;
 use dynamics;
 use shapes;
 
@@ -34,7 +33,8 @@ pub struct box2d_QueryCallback;
 
 pub struct box2d_UserData;
 
-
+#[link(name = "cbox2d", kind = "static")]
+#[link_args = "-lcbox2d -lBox2D -lstdc++"]
 extern {
     // b2World
     pub fn box2d_World_Create(gravity: *Vec2) -> *box2d_World;

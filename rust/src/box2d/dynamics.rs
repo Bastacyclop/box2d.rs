@@ -24,77 +24,77 @@ pub static FRICTION_JOINT: JointType     = 9 as JointType;
 pub static ROPE_JOINT: JointType         = 10 as JointType;
 
 pub struct World {
-    ptr: *ffi::box2d_World,
+    pub ptr: *ffi::box2d_World,
 }
 
 pub struct Body {
-    ptr: *ffi::box2d_Body,
+    pub ptr: *ffi::box2d_Body,
 }
 
 pub struct Fixture {
-    ptr: *ffi::box2d_Fixture,
+    pub ptr: *ffi::box2d_Fixture,
 }
 
 pub struct Joint {
-    ptr: *ffi::box2d_Joint,
+    pub ptr: *ffi::box2d_Joint,
 }
 
 pub struct Contact {
-    ptr: *ffi::box2d_Contact,
+    pub ptr: *ffi::box2d_Contact,
 }
 
 pub struct BodyDef {
     /// The body type: static, kinematic, or dynamic.
     /// Note: if a dynamic body would have zero mass, the mass is set to one.
-    body_type: BodyType,
+    pub body_type: BodyType,
 
     /// The world position of the body. Avoid creating bodies at the origin
     /// since this can lead to many overlapping shapes.
-    position: Vec2,
+    pub position: Vec2,
 
     /// The world angle of the body in radians.
-    angle: f32,
+    pub angle: f32,
 
     /// The linear velocity of the body's origin in world co-ordinates.
-    linear_velocity: Vec2,
+    pub linear_velocity: Vec2,
 
     /// The angular velocity of the body.
-    angular_velocity: f32,
+    pub angular_velocity: f32,
 
     /// Linear damping is use to reduce the linear velocity. The damping parameter
     /// can be larger than 1.0f but the damping effect becomes sensitive to the
     /// time step when the damping parameter is large.
-    linear_damping: f32,
+    pub linear_damping: f32,
 
     /// Angular damping is use to reduce the angular velocity. The damping parameter
     /// can be larger than 1.0f but the damping effect becomes sensitive to the
     /// time step when the damping parameter is large.
-    angular_damping: f32,
+    pub angular_damping: f32,
 
     /// Set this flag to false if this body should never fall asleep. Note that
     /// this increases CPU usage.
-    allow_sleep: bool,
+    pub allow_sleep: bool,
 
     /// Is this body initially awake or sleeping?
-    awake: bool,
+    pub awake: bool,
 
     /// Should this body be prevented from rotating? Useful for characters.
-    fixed_rotation: bool,
+    pub fixed_rotation: bool,
 
     /// Is this a fast moving body that should be prevented from tunneling through
     /// other moving bodies? Note that all bodies are prevented from tunneling through
     /// kinematic and static bodies. This setting is only considered on dynamic bodies.
     /// @warning You should use this flag sparingly since it increases processing time.
-    bullet: bool,
+    pub bullet: bool,
 
     /// Does this body start out active?
-    active: bool,
+    pub active: bool,
 
     /// Use this to store application specific body data.
-    user_data: *ffi::box2d_UserData,
+    pub user_data: *ffi::box2d_UserData,
 
     /// Scale the gravity applied to this body.
-    gravity_scale : f32,
+    pub gravity_scale : f32,
 }
 
 impl BodyDef {
@@ -122,33 +122,33 @@ impl BodyDef {
 
 pub struct JointDef {
     /// The joint type is set automatically for concrete joint types.
-    joint_type: JointType,
+    pub joint_type: JointType,
 
     /// Use this to attach application specific data to your joints.
-    user_data: common::UserData,
+    pub user_data: common::UserData,
 
     /// The first attached body.
-    body_a: *ffi::box2d_Body,
+    pub body_a: *ffi::box2d_Body,
 
     /// The second attached body.
-    body_b: *ffi::box2d_Body,
+    pub body_b: *ffi::box2d_Body,
 
     /// Set this flag to true if the attached bodies should collide.
-    collide_connected: bool,
+    pub collide_connected: bool,
 }
 
 pub struct Filter {
     /// The collision category bits. Normally you would just set one bit.
-    category_bits: u16,
+    pub category_bits: u16,
 
     /// The collision mask bits. This states the categories that this
     /// shape would accept for collision.
-    mask_bits: i16,
+    pub mask_bits: i16,
 
     /// Collision groups allow a certain group of objects to never collide (negative)
     /// or always collide (positive). Zero means no collision group. Non-zero group
     /// filtering always wins against the mask bits.
-    group_index: i16,
+    pub group_index: i16,
 }
 
 /// A fixture definition is used to create a fixture. This class defines an
@@ -156,26 +156,26 @@ pub struct Filter {
 pub struct FixtureDef<'l> {
     /// The shape, this must be set. The shape will be cloned, so you
     /// can create the shape on the stack.
-    shape: &'l ffi::box2d_Shape,
+    pub shape: &'l ffi::box2d_Shape,
 
     /// Use this to store application specific fixture data.
-    userData: *ffi::box2d_UserData,
+    pub userData: *ffi::box2d_UserData,
 
     /// The friction coefficient, usually in the range [0,1].
-    friction: f32,
+    pub friction: f32,
 
     /// The restitution (elasticity) usually in the range [0,1].
-    restitution: f32,
+    pub restitution: f32,
 
     /// The density, usually in kg/m^2.
-    density: f32,
+    pub density: f32,
 
     /// A sensor shape collects contact information but never generates a collision
     /// response.
-    is_sensor: bool,
+    pub is_sensor: bool,
 
     /// Contact filtering data.
-    filter: Filter,
+    pub filter: Filter,
 }
 
 impl<'l> FixtureDef<'l> {

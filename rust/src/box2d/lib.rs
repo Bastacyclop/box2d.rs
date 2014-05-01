@@ -1,4 +1,8 @@
-#[link(name="cbox2d", kind="static")]
+#![crate_id = "box2drs"]
+
+#![allow(non_camel_case_types)]
+#![feature(link_args)]
+#[cfg(main_test)]
 use std::mem;
 
 pub mod math;
@@ -8,9 +12,9 @@ pub mod shapes;
 pub mod settings;
 pub mod common;
 
-
+#[cfg(main_test)]
 fn main () {
-    println("Rust box2d test...");
+    println!("Rust box2d test...");
 
     // Prepare for simulation. Typically we use a time step of 1/60 of a
     // second (60Hz) and 10 iterations. This provides a high quality simulation
@@ -43,7 +47,7 @@ fn main () {
 
     assert_eq!(world.get_body_count(), 1);
 
-    for i in range(0, 60) {
+    for _ in range(0, 60) {
         world.step(time_step, velocity_iterations, position_iterations);
         let pos = b1.get_position();
         println!("b1: [x:{}, y:{}]", pos.x, pos.y);

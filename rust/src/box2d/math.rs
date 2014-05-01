@@ -1,13 +1,28 @@
+use std::fmt;
 
-#[deriving(Eq, Ord)]
+#[deriving(Eq, Ord, Show)]
 pub struct Vec2 {
-    x: f32,
-    y: f32,
+    pub x: f32,
+    pub y: f32,
 }
+
+/*
+impl fmt::Show for Vec2 {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f.buf, "({}, {})", self.x, self.y)
+    }
+}
+*/
 
 #[deriving(Eq, Ord)]
 pub struct Vec3 {
-    x: f32,
-    y: f32,
-    z: f32,
+    pub x: f32,
+    pub y: f32,
+    pub z: f32,
+}
+
+impl fmt::Show for Vec3 {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f.buf, "({}, {}, {})", self.x, self.y, self.z)
+    }
 }
